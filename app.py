@@ -189,7 +189,12 @@ if is_valid_user:
             
         with f5:
             cats = df['CAT_BLOQUEIO'].unique().tolist()
-            for rm in ['GELADEIRA', 'FREEZER', 'FRESH GELADEIRA', 'FRESH FREEZER']: cats.remove(rm)
+            
+            for rm in ['GELADEIRA', 'FREEZER', 'FRESH GELADEIRA', 'FRESH FREEZER']:
+                
+                try: cats.remove(rm)
+                except: continue
+            
             cats.insert(1, 'GELADOS')
 
             cat_bloqueios = st.multiselect('Categorias', options=cats, key='cat_bloqueios')
