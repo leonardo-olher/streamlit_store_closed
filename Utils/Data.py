@@ -1,9 +1,11 @@
+#%%
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from snowflake.connector.pandas_tools import write_pandas
 import pytz
 import snowflake.connector as sf
 import numpy as np
+import pandas as pd
 
 # == TIMEZONE BRASIL ==
 def tz():
@@ -38,7 +40,7 @@ def last_update(df):
 
 
 # == EXPORT DATA SNOWFLAKE ==
-def snowflake(usr, pwd, acc, wh, db, sch, query=None):
+def snowflake(usr, pwd, acc, wh, db, sch, query):
 
     ctx = sf\
         .connect(
@@ -55,6 +57,9 @@ def snowflake(usr, pwd, acc, wh, db, sch, query=None):
 # == | == | == | == | == |
 
 
+
+
+# == DATAS FILTROS ==
 def filtros_data(df):
 
     dt_min = np.min(df['EFFECTIVE_DAY'])
@@ -72,3 +77,16 @@ def filtros_data(df):
     end_dt1 = start_dt1 + relativedelta(months=1) - timedelta(days=1)
 
     return (start_dt1, end_dt1), (start_dt2, end_dt2), (start_dt3, end_dt3), dt_min
+
+# == | == | == | == | == |
+
+
+
+
+# == LOCAL DATA ==
+def load_local_data():
+    df = pd.read_parquet('data.parquet')
+    return df
+
+
+# == | == | == | == | == |
