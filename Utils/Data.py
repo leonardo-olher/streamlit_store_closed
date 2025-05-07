@@ -1,7 +1,6 @@
 #%%
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from snowflake.connector.pandas_tools import write_pandas
 import pytz
 import snowflake.connector as sf
 import numpy as np
@@ -29,7 +28,7 @@ def current_date():
 def last_update(df):
 
     try:
-        return np.max(df['ATUALIZACAO']).replace(tzinfo=tz())
+        return np.max(df['ATUALIZACAO']).replace(tzinfo=tz()) - timedelta(hours=3)
 
     except:
         return datetime(2000,1,1,0,0,0,0,tzinfo=tz())

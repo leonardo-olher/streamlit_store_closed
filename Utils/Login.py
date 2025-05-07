@@ -3,6 +3,7 @@ import requests
 from authlib.integrations.requests_client import OAuth2Session
 
 
+# === LOGIN GOOGLE ===
 def login(client_id, client_secret, redirect_uri, button=True):
 
     authorize_url = "https://accounts.google.com/o/oauth2/v2/auth"
@@ -48,10 +49,16 @@ def login(client_id, client_secret, redirect_uri, button=True):
         """, unsafe_allow_html=True)
         st.link_button(label='Login com Google', url=uri, type='secondary')
 
+
+
     return oauth
 
+# == | == | == | == | == |
 
 
+
+
+# === VERIFICAR TOKEN ===
 def get_token(client_id, client_secret, redirect_uri, code):
 
     oauth = login(client_id, client_secret, redirect_uri, button=False)
@@ -61,8 +68,12 @@ def get_token(client_id, client_secret, redirect_uri, code):
     
     return token
 
+# == | == | == | == | == |
 
 
+
+
+# === API REST COM TOKEN GERADA ===
 def get_userinfo(token):
 
     userinfo_url = "https://www.googleapis.com/oauth2/v3/userinfo"
@@ -77,12 +88,15 @@ def get_userinfo(token):
 
     return user_valid, name, photo
 
+# == | == | == | == | == |
 
 
 
 
+# === DADOS USER ===
 def display_user(name, photo):
     l1, l2 = st.columns([98,2])
     l1.markdown(f'<div style="text-align: right;">{name}</div><br><br>', unsafe_allow_html=True)
     l2.image(photo, width=40)
-    
+
+# == | == | == | == | == |

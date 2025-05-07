@@ -444,9 +444,10 @@ def bars(df, cat, hub, dt_start, dt_end):
             )
         )\
         .update_layout(
-            barmode='overlay'
+             barmode='overlay'
             ,dragmode=False
             ,showlegend=False
+            ,autosize=False
             ,yaxis=dict(
                 showticklabels=False,
                 showgrid=False,
@@ -457,10 +458,12 @@ def bars(df, cat, hub, dt_start, dt_end):
                 zeroline=False
             )
             ,height = 300
-        )
-    
-    return fig
+        )\
+    .update_yaxes(
+        range=[0, 1.2],
+    )
 
+    return fig
 
 def config_radars():
 
