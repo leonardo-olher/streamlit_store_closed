@@ -1,3 +1,4 @@
+#%%
 import plotly.graph_objects as go
 import numpy as np
 import streamlit as st
@@ -91,16 +92,15 @@ def data_radar(df, hubs, hubs_media, cat, dt_start, dt_end, dts_min_max=None):
     df_radar = df[(df['EFFECTIVE_DAY'] >= dt_start) & (df['EFFECTIVE_DAY'] <= dt_end)].copy()
 
 
-
     # === COLUNAS NECESSARIAS ===
     index = ['HUB_CODE','CAT_BLOQUEIO']
     cols_radar = ['MINUTOS_INICIO_RECEBIMENTO','MINUTOS_INICIO_RECEBIMENTO_POND','MINUTOS_RECEBIMENTO','PICKED_QTY'
-                ,'MINUTOS_RECEBIMENTO_POND','MINUTOS_RECEBIMENTO_COMPLETO','MINUTOS_RECEBIMENTO_POND_COMPLETO'
-                ,'PENDING_QTY_PER_M2','CHANGED_QTY_PER_M2','SKUS_POR_GELADEIRA','SKUS_REPLENISH_POR_GELADEIRA'
-                ,'SKUS_WITH_STOCK_PER_M2','SKUS_REPLENISH_PER_M2','STOCK_GMV_POR_GELADEIRA','STOCK_KG_POR_GELADEIRA'
-                ,'STOCK_COGS_PER_M2','STOCK_QTY_PER_M2','STOCK_KG_PER_M2','COUNT_ORDERS_PER_M2','UNITS_SOLD_PER_M2'
-                ,'STOCK_COGS','STOCK_GMV','STOCK_QTY','STOCK_KG','SKUS_REPLENISHABLE','SKUS_WITH_STOCK','COUNT_ORDERS'
-                ,'UNITS_SOLD','COGS_SOLD','GMV_SOLD','PENDING_QTY','CHANGED_QTY','MIT_QTY']
+                 ,'MINUTOS_RECEBIMENTO_POND','MINUTOS_RECEBIMENTO_COMPLETO','MINUTOS_RECEBIMENTO_POND_COMPLETO'
+                 ,'PENDING_QTY_PER_M2','CHANGED_QTY_PER_M2','SKUS_POR_GELADEIRA','SKUS_REPLENISH_POR_GELADEIRA'
+                 ,'SKUS_WITH_STOCK_PER_M2','SKUS_REPLENISH_PER_M2','STOCK_GMV_POR_GELADEIRA','STOCK_KG_POR_GELADEIRA'
+                 ,'STOCK_COGS_PER_M2','STOCK_QTY_PER_M2','STOCK_KG_PER_M2','COUNT_ORDERS_PER_M2','UNITS_SOLD_PER_M2'
+                 ,'STOCK_COGS','STOCK_GMV','STOCK_QTY','STOCK_KG','SKUS_REPLENISHABLE','SKUS_WITH_STOCK','COUNT_ORDERS'
+                 ,'UNITS_SOLD','COGS_SOLD','GMV_SOLD','PENDING_QTY','CHANGED_QTY','MIT_QTY']
 
 
     # === COLS EXCLUSIVAS GELADOS ===
@@ -189,6 +189,8 @@ def data_radar(df, hubs, hubs_media, cat, dt_start, dt_end, dts_min_max=None):
 
     media = groupby_radarplot(df_radar[(df_radar['HUB_CODE'].isin(hubs_media)) & (df_radar['CAT'] != '-')], cat, cols_radar)
     hub_radar = groupby_radarplot(df_radar[(df_radar['HUB_CODE'].isin(hubs)) & (df_radar['CAT'] != '-')], cat, cols_radar)
+
+    hub_radar = tratar_df_null(hub_radar)
 
     return hub_radar, media
 
@@ -362,20 +364,23 @@ def data_barplots(df, cat, hubs, dt_start, dt_end):
     df['CAT_BLOQUEIO'] = np.where(df['CAT_BLOQUEIO'].isin(gelados), 'GELADOS', df['CAT_BLOQUEIO'])
 
     df = df[(df['CAT_BLOQUEIO'] == cat) & (df['HUB_CODE'].isin(hubs)) & (df['EFFECTIVE_DAY'] >= dt_start) & (df['EFFECTIVE_DAY'] <= dt_end)].copy()
+    df = tratar_df_null(df)
 
     df['GROUP'] = '-'
     df['COUNT'] = 1
     df['COUNT_BLOQUEIOS'] = np.where(df['NIVEL_STORE_CLOSED'] > 0, 1, 0)
-    cols = ['IS_VALID_OOS', 'IS_OOS', 'COUNT', 'COUNT_BLOQUEIOS', 'WASTE_COGS', 'COGS_SOLD', 'STOCK_QTY', 'AVG_SALES']
+    df['COUNT_BLOQUEAR_TUDO'] = np.where(df['STORE_CLOSED'] == 'BLOQUEAR TUDO', 1, 0)
+    cols = ['IS_VALID_OOS', 'IS_OOS', 'COUNT', 'COUNT_BLOQUEIOS', 'COUNT_BLOQUEAR_TUDO', 'WASTE_COGS', 'COGS_SOLD', 'STOCK_QTY', 'AVG_SALES']
 
     df = df.groupby('GROUP', as_index=False)[cols].sum()
 
-    df['OOS'] = df['IS_OOS'] / df['IS_VALID_OOS'] * 100
-    df['DSI'] = df['STOCK_QTY'] / df['AVG_SALES']
-    df['STORE CLOSED'] = df['COUNT_BLOQUEIOS'] / df['COUNT'] * 100
-    df['WASTE'] = df['WASTE_COGS'] / df['COGS_SOLD'] * -100
+    df['OOS'] = (df['IS_OOS'] / df['IS_VALID_OOS'] * 100).fillna(0)
+    df['DSI'] = (df['STOCK_QTY'] / df['AVG_SALES']).fillna(0)
+    df['WASTE'] = (df['WASTE_COGS'] / df['COGS_SOLD'] * -100).fillna(0)
+    df['SC PARCIAL'] = ((df['COUNT_BLOQUEIOS']-df['COUNT_BLOQUEAR_TUDO']) / df['COUNT'] * 100).fillna(0)
+    df['SC TOTAL'] = (df['COUNT_BLOQUEAR_TUDO'] / df['COUNT'] * 100).fillna(0)
 
-    df = df[['OOS', 'STORE CLOSED', 'WASTE', 'DSI']]
+    df = df[['OOS', 'SC PARCIAL', 'SC TOTAL', 'WASTE', 'DSI']]
     
     df = df\
         .transpose()\
@@ -390,8 +395,10 @@ def data_barplots(df, cat, hubs, dt_start, dt_end):
     df['SORT'] = np\
         .where(df['METRICS'] == 'OOS', 1, np\
         .where(df['METRICS'] == 'DSI', 2, np\
-        .where(df['METRICS'] == 'STORE CLOSED', 3, np\
-        .where(df['METRICS'] == 'WASTE', 4, 5))))
+        .where(df['METRICS'] == 'WASTE', 3, np\
+        .where(df['METRICS'] == 'SC PARCIAL', 4, np\
+        .where(df['METRICS'] == 'SC TOTAL', 5,
+        6)))))
     
     df = df.sort_values('SORT')
 
@@ -478,3 +485,33 @@ def config_radars():
     }
 
     return config
+
+
+def tratar_df_null(df):
+
+    if df.shape[0] == 0:
+
+        cat = 'SECOS'
+        df_null = {}
+
+        cats_null = ['Backlog'
+                    ,'Estoque'
+                    ,'Imprecisão Estoque'
+                    ,'Pedidos'
+                    ,'Recebimento'
+                    ,'Sortimento']
+
+        for col in df.columns.tolist():
+
+            if col == 'CAT_BLOQUEIO':
+                df_null['CAT_BLOQUEIO'] = [cat] * len(cats_null)
+            
+            elif col == 'CAT':
+                df_null['CAT'] = cats_null
+
+            else:
+                df_null[col] = [0] * len(cats_null)
+
+        df = pd.concat([df, pd.DataFrame(df_null)], axis=0)
+
+    return df

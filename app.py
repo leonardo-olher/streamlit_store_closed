@@ -215,14 +215,14 @@ if is_valid_user:
 
 
         with f6:
-            media = st.selectbox('Média', options=['Todas as Lojas', 'Lojas Criticas', 'Lojas Não Criticas', 'Desativar'], index=0, key='media')
+            media = st.selectbox('Média', options=['Todas as Lojas', 'Lojas Criticas', 'Lojas Não Criticas', 'Desativar'], index=2, key='media')
             lojas_criticas_filtro = 30
 
             if media == 'Todas as Lojas':
                 hubs_media_dt1 = hubs_media_dt2 = hubs_media_dt3 = df['HUB_CODE'].unique().tolist()
 
             elif media == 'Lojas Criticas' or media == 'Lojas Não Criticas':
-                lojas_criticas_filtro = st.slider('% De Bloqueios', min_value=0.0, max_value=1.0, value=.3, step=0.01, format="%0.2f", key='lojas_criticas_filtro')
+                lojas_criticas_filtro = st.slider('% De Bloqueios', min_value=0.0, max_value=1.0, value=.2, step=0.01, format="%0.2f", key='lojas_criticas_filtro')
                 hubs_media_dt1 = lojas_criticas_list(df, lojas_criticas_filtro, media, dt1_filtro)
                 hubs_media_dt2 = lojas_criticas_list(df, lojas_criticas_filtro, media, dt2_filtro)
                 hubs_media_dt3 = lojas_criticas_list(df, lojas_criticas_filtro, media, dt3_filtro)
@@ -255,3 +255,40 @@ if is_valid_user:
         container_radares(df, title, rgb=cat_color(cat), cat=cat, dts_start=(dt1_filtro[0], dt2_filtro[0], dt3_filtro[0]), dts_end=(dt1_filtro[1], dt2_filtro[1], dt3_filtro[1]), hubs=hubs_filtro, hubs_media=(hubs_media_dt1, hubs_media_dt2, hubs_media_dt3))
 
     # == / == / == / == / == / == / == /
+
+
+#%%
+# from Utils.Data import *
+# from dotenv import load_dotenv; load_dotenv('.env')
+# from os import getenv
+# import pandas as pd
+# import numpy as np
+# from datetime import datetime
+
+# USR = getenv('SF_USER')
+# PWD = getenv('SF_PWD')
+# ACC = getenv('SF_ACC')
+# DB  = getenv('SF_DB')
+# SCH = getenv('SF_SCHEMA')
+# WH  = getenv('SF_WAREHOUSE')
+
+# antigo = pd.read_parquet('data.parquet')
+# filtro = datetime.strftime(np.max(antigo['EFFECTIVE_DAY']), "where effective_day > '%Y-%m-%d'::date")
+
+# df = snowflake(USR, PWD, ACC, WH, DB, SCH,
+#                 query = f'select * from daki_supply.analysis.predict_store_closed {filtro}')
+
+# df = pd.concat([antigo, df], axis=0)
+
+# df.to_parquet('data.parquet', index=False)
+
+
+#%%
+
+# # >> REMOVE DATE
+# from datetime import date
+# import pandas as pd
+
+# df = pd.read_parquet('data.parquet')
+# df = df[df['EFFECTIVE_DAY'] < date(2025,5,20)]
+# df.to_parquet('data.parquet')
