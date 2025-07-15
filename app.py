@@ -2,6 +2,7 @@
 # === LIBS ===
 import streamlit as st
 import pandas as pd
+import numpy as np
 
 # === DATE ===
 from datetime import datetime, timedelta, date
@@ -240,7 +241,7 @@ if is_valid_user:
     if len(hubs_filtro) == 1:
         title= ''
         hub_data = df[df['HUB_CODE'].isin(hubs_filtro)].iloc[0]
-        title = f"{hub_data['HUB_CODE']} - {hub_data['HUB_NAME']} [{hub_data['M2'].fillna(0)}M²] | "
+        title = f"{hub_data['HUB_CODE']} - {hub_data['HUB_NAME']} [{np.nan_to_num(hub_data['M2'], nan=0.0)}M²] | "
 
     else:
         title = ''
@@ -255,46 +256,3 @@ if is_valid_user:
         container_radares(df, title, rgb=cat_color(cat), cat=cat, dts_start=(dt1_filtro[0], dt2_filtro[0], dt3_filtro[0]), dts_end=(dt1_filtro[1], dt2_filtro[1], dt3_filtro[1]), hubs=hubs_filtro, hubs_media=(hubs_media_dt1, hubs_media_dt2, hubs_media_dt3))
 
     # == / == / == / == / == / == / == /
-
-
-#%%
-# from Utils.Data import *
-# from dotenv import load_dotenv; load_dotenv('.env')
-# from os import getenv
-# import pandas as pd
-# import numpy as np
-# from datetime import datetime
-
-# USR = getenv('SF_USER')
-# PWD = getenv('SF_PWD')
-# ACC = getenv('SF_ACC')
-# DB  = getenv('SF_DB')
-# SCH = getenv('SF_SCHEMA')
-# WH  = getenv('SF_WAREHOUSE')
-
-# antigo = pd.read_parquet('data.parquet')
-# filtro = datetime.strftime(np.max(antigo['EFFECTIVE_DAY']), "where effective_day > '%Y-%m-%d'::date")
-
-# df = snowflake(USR, PWD, ACC, WH, DB, SCH,
-#                 query = f'select * from daki_supply.analysis.predict_store_closed {filtro}')
-
-# df = pd.concat([antigo, df], axis=0)
-
-# df.to_parquet('data.parquet', index=False)
-
-
-#%%
-
-# # >> REMOVE DATE
-# from datetime import date
-# import pandas as pd
-
-# df = pd.read_parquet('data.parquet')
-# df = df[df['EFFECTIVE_DAY'] < date(2025,5,20)]
-# df.to_parquet('data.parquet')
-
-#%%
-# import pandas as pd
-
-# df = pd.read_parquet('data.parquet')
-# df[df['HUB_CODE'] == 'SAO068']
