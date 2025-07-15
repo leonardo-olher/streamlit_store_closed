@@ -175,16 +175,16 @@ if is_valid_user:
                 dt3_filtro = dts3
 
         with f4:
-            hubs = st.multiselect('Lojas', options=(df['HUB_CODE'] + ' - ' + df['HUB_NAME'] + ' [' + df['TAMANHO_LOJA'] + ']').unique(), key='hubs')
+            hubs = st.multiselect('Lojas', options=(df['HUB_CODE'] + ' - ' + df['HUB_NAME'] + ' [' + df['TAMANHO_LOJA'].fillna(' - ') + ']').unique(), key='hubs')
             hubs_except = st.toggle('Exceto', False, key='hubs_except')
 
             if hubs != []: # FILTRAR SE TIVER ALGUM HUB SELECIONADO
                 
                 if hubs_except:
-                    hubs_filtro = df[~(df['HUB_CODE'] + ' - ' + df['HUB_NAME'] + ' [' + df['TAMANHO_LOJA'] + ']').isin(hubs)]['HUB_CODE'].unique().tolist()
+                    hubs_filtro = df[~(df['HUB_CODE'] + ' - ' + df['HUB_NAME'] + ' [' + df['TAMANHO_LOJA'].fillna(' - ') + ']').isin(hubs)]['HUB_CODE'].unique().tolist()
 
                 else:
-                    hubs_filtro = df[(df['HUB_CODE'] + ' - ' + df['HUB_NAME'] + ' [' + df['TAMANHO_LOJA'] + ']').isin(hubs)]['HUB_CODE'].unique().tolist()
+                    hubs_filtro = df[(df['HUB_CODE'] + ' - ' + df['HUB_NAME'] + ' [' + df['TAMANHO_LOJA'].fillna(' - ') + ']').isin(hubs)]['HUB_CODE'].unique().tolist()
 
             else:
                 hubs_filtro = df['HUB_CODE'].unique().tolist()
@@ -240,7 +240,7 @@ if is_valid_user:
     if len(hubs_filtro) == 1:
         title= ''
         hub_data = df[df['HUB_CODE'].isin(hubs_filtro)].iloc[0]
-        title = f"{hub_data['HUB_CODE']} - {hub_data['HUB_NAME']} [{hub_data['M2']}M²] | "
+        title = f"{hub_data['HUB_CODE']} - {hub_data['HUB_NAME']} [{hub_data['M2'].fillna(' - ')}M²] | "
 
     else:
         title = ''
@@ -292,3 +292,9 @@ if is_valid_user:
 # df = pd.read_parquet('data.parquet')
 # df = df[df['EFFECTIVE_DAY'] < date(2025,5,20)]
 # df.to_parquet('data.parquet')
+
+#%%
+# import pandas as pd
+
+# df = pd.read_parquet('data.parquet')
+# df[df['HUB_CODE'] == 'SAO068']
