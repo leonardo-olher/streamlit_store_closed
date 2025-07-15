@@ -240,7 +240,7 @@ if is_valid_user:
     if len(hubs_filtro) == 1:
         title= ''
         hub_data = df[df['HUB_CODE'].isin(hubs_filtro)].iloc[0]
-        title = f"{hub_data['HUB_CODE']} - {hub_data['HUB_NAME']} [{hub_data['M2'].fillna(' - ')}M²] | "
+        title = f"{hub_data['HUB_CODE']} - {hub_data['HUB_NAME']} [{hub_data['M2'].fillna(0)}M²] | "
 
     else:
         title = ''
