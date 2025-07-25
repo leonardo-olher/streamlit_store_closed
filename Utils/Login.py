@@ -30,26 +30,33 @@ def login(client_id, client_secret, redirect_uri, button=True):
         </div>
         """, unsafe_allow_html=True)
             
-            
+
         st.markdown("""
-        <style>
-            /* Centraliza o link_button sem esticar */
-            .stLinkButton {
-                display: flex;
-                justify-content: center;
-            }
-            
-            /* Mantém o tamanho original do botão */
-            .stLinkButton>a {
-                width: auto !important;
-                padding-left: 2rem;
-                padding-right: 2rem;
-            }
-        </style>
-        """, unsafe_allow_html=True)
-        st.link_button(label='Login com Google', url=uri, type='secondary')
+            <style>
+                .stLinkButtonCustom {{
+                    display: flex;
+                    justify-content: center;
+                    margin-top: 1rem;
+                }}
 
+                .stLinkButtonCustom a {{
+                    text-decoration: none;
+                    background-color: #f0f0f5;
+                    color: #333;
+                    padding: 0.5rem 1.5rem;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    border: 1px solid #ccc;
+                }}
 
+                .stLinkButtonCustom a:hover {{
+                    background-color: #e0e0e0;
+                }}
+            </style>
+            <div class="stLinkButtonCustom">
+                <a href="{0}" target="_self">Login com Google</a>
+            </div>
+        """.format(uri), unsafe_allow_html=True)
 
     return oauth
 
